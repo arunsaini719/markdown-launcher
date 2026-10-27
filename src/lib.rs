@@ -1,0 +1,12 @@
+pub mod config;
+pub mod desktop;
+pub mod editing;
+mod editor;
+pub mod index;
+pub mod launcher;
+mod new_note;
+pub mod notes;
+pub mod preview;
+mod preview_selection;
+pub mod settings;
+mod workspace_ui;

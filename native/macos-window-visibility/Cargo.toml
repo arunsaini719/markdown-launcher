@@ -1,0 +1,12 @@
+[package]
+name = "macos-window-visibility"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+objc2-app-kit = "0.3.2"
+raw-window-handle = "0.6.2"
+
+[lints.rust]
+unsafe_code = "deny"
