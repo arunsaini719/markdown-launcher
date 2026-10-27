@@ -1,12 +1,23 @@
-# Keyboard-Driven Markdown Snippet Manager
+# Markdown Launcher
 
-A local desktop launcher for finding Markdown files and copying their content
-without leaving the keyboard.
+[![CI](https://github.com/arunsaini719/markdown-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/arunsaini719/markdown-launcher/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 
-The application will recursively discover Markdown files under the user's home
-directory, maintain a local SQLite search index, and expose the results through
-a GPUI Kit launcher. Markdown files remain the source of truth; the database is
-a rebuildable local cache.
+A local-first, keyboard-driven desktop launcher for finding, previewing, and
+editing Markdown notes without interrupting your workflow.
+
+Markdown Launcher recursively discovers files under explicitly configured
+roots and maintains a rebuildable SQLite FTS5 search index. Markdown files stay
+the source of truth, search and editing work without a network service, and the
+index can be discarded and recreated at any time.
+
+## Why Markdown Launcher?
+
+- Find notes by title, tags, path, or full Markdown content.
+- Keep notes as portable files instead of storing them in an application silo.
+- Navigate, preview, copy, create, and edit without leaving the keyboard.
+- Detect external changes before atomically replacing edited files.
+- Run indexing and filesystem synchronization entirely on the local machine.
 
 ## Current scope
 
@@ -63,7 +74,7 @@ through the `global_shortcut` value in the generated configuration file.
   Review the full filename and destination, then press Enter or choose **Create Note**. Escape cancels without
   changing the current query or selection. Validation errors remain in the dialog.
 - Press Command/Ctrl+Shift+R to rebuild the disposable search index.
-- On macOS, press Command+, or choose **Settings…** from the menu bar to hide
+- On macOS, press Command+, or choose **Settings...** from the menu bar to hide
   the search popup and edit indexing and shortcut settings. The window shows the
   recommended defaults and can restore them to the unsaved draft. Saved changes
   apply after restarting the app.
@@ -72,7 +83,7 @@ through the `global_shortcut` value in the generated configuration file.
 
 The application remains resident while the launcher is hidden so indexing and
 filesystem synchronization can continue. On macOS, its menu bar item provides
-**Open Launcher**, **Settings…**, **Rebuild Index**, **Launch at Login**, and
+**Open Launcher**, **Settings...**, **Rebuild Index**, **Launch at Login**, and
 **Quit Markdown Launcher** actions. Launch at Login is disabled by default and
 can be toggled explicitly after installing the app. Only one macOS application
 instance runs at a time.
@@ -176,6 +187,14 @@ and single-instance protection are implemented.
 Developer ID signing, notarization, installers, and public release automation
 remain future work.
 
+## Platform support
+
+macOS 15 or later is the primary supported desktop platform and includes local
+`.app` packaging, menu bar controls, Launch at Login, and single-instance
+protection. The core application also builds on Linux; native global shortcuts
+require an X11 session. Signed and notarized release binaries are not available
+yet.
+
 ## Development
 
 The application is built with Rust and
@@ -209,3 +228,16 @@ cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-targets --all-features
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, testing
+expectations, and pull request guidance.
+
+## License
+
+Markdown Launcher is available under either of the following licenses, at your
+option:
+
+- [Apache License, Version 2.0](LICENSE-APACHE)
+- [MIT License](LICENSE-MIT)
