@@ -75,6 +75,8 @@ gpui_kit::actions!(
     [
         SelectPrevious,
         SelectNext,
+        SelectFirst,
+        SelectLast,
         ActivateSelected,
         FocusPreview,
         PreviewPageUp,
@@ -101,6 +103,8 @@ pub fn init_launcher(cx: &mut App) {
     cx.bind_keys([
         KeyBinding::new("up", SelectPrevious, Some(KEY_CONTEXT)),
         KeyBinding::new("down", SelectNext, Some(KEY_CONTEXT)),
+        KeyBinding::new("ctrl-home", SelectFirst, Some(KEY_CONTEXT)),
+        KeyBinding::new("ctrl-end", SelectLast, Some(KEY_CONTEXT)),
         KeyBinding::new("enter", FocusPreview, Some(KEY_CONTEXT)),
         KeyBinding::new("cmd-shift-c", ActivateSelected, Some(KEY_CONTEXT)),
         KeyBinding::new("ctrl-shift-c", ActivateSelected, Some(KEY_CONTEXT)),
@@ -909,6 +913,32 @@ impl Launcher {
         cx.notify();
     }
 
+    fn select_first(&mut self, _: &SelectFirst, window: &mut Window, cx: &mut Context<Self>) {
+        self.select_boundary(false, window, cx);
+    }
+
+    fn select_last(&mut self, _: &SelectLast, window: &mut Window, cx: &mut Context<Self>) {
+        self.select_boundary(true, window, cx);
+    }
+
+    fn select_boundary(&mut self, last: bool, window: &mut Window, cx: &mut Context<Self>) {
+        if self.editor.read(cx).is_focused(window, cx)
+            || self.preview_focus.is_focused(window)
+            || self.results_query.as_deref() != Some(self.search_query.as_str())
+        {
+            return;
+        }
+        let selected =
+            (!self.results.is_empty()).then(|| if last { self.results.len() - 1 } else { 0 });
+        if selected != self.selected_index {
+            self.selected_index = selected;
+            self.load_selected_preview(cx);
+        }
+        self.query.update(cx, |input, cx| input.focus(window, cx));
+        self.scroll_to_selection();
+        cx.notify();
+    }
+
     fn clear_preview(&mut self) {
         self.preview_generation.fetch_add(1, Ordering::Relaxed);
         self._preview_task = Task::ready(());
@@ -1672,6 +1702,8 @@ impl Launcher {
                 result.canonical_path.to_string_lossy().into_owned(),
             ))
             .debug_selector(move || format!("result-{index}"))
+            .role(gpui_kit::accesskit::Role::ListBoxOption)
+            .aria_selected(selected)
             .w_full()
             .h(px(88.0))
             .group(hover_group.clone())
@@ -1826,6 +1858,8 @@ impl Render for Launcher {
             })
             .on_action(cx.listener(Self::select_previous))
             .on_action(cx.listener(Self::select_next))
+            .on_action(cx.listener(Self::select_first))
+            .on_action(cx.listener(Self::select_last))
             .on_action(cx.listener(Self::activate_selected))
             .on_action(cx.listener(Self::focus_preview))
             .on_action(cx.listener(Self::dismiss))
@@ -1915,20 +1949,29 @@ impl Render for Launcher {
                     .min_h_0()
                     .gap_3()
                     .child(
-                        uniform_list(
-                            "search-results",
-                            result_count,
-                            cx.processor(|launcher, range: std::ops::Range<usize>, _, cx| {
-                                range
-                                    .map(|index| launcher.render_result_row(index, cx))
-                                    .collect::<Vec<_>>()
-                            }),
-                        )
-                        .debug_selector(|| "search-results".into())
-                        .w(gpui_kit::relative(0.35))
-                        .h_full()
-                        .flex_shrink_0()
-                        .track_scroll(&self.scroll_handle),
+                        div()
+                            .id("search-results-listbox")
+                            .role(gpui_kit::accesskit::Role::ListBox)
+                            .aria_label("Markdown search results")
+                            .w(gpui_kit::relative(0.35))
+                            .h_full()
+                            .flex_shrink_0()
+                            .child(
+                                uniform_list(
+                                    "search-results",
+                                    result_count,
+                                    cx.processor(
+                                        |launcher, range: std::ops::Range<usize>, _, cx| {
+                                            range
+                                                .map(|index| launcher.render_result_row(index, cx))
+                                                .collect::<Vec<_>>()
+                                        },
+                                    ),
+                                )
+                                .debug_selector(|| "search-results".into())
+                                .size_full()
+                                .track_scroll(&self.scroll_handle),
+                            ),
                     )
                     .child(self.render_preview(window, cx)),
             )

@@ -582,6 +582,26 @@ fn arrows_from_a_row_button_return_focus_to_search_before_that_button_hides(
 }
 
 #[gpui_kit::test]
+fn boundary_shortcuts_traverse_the_accessible_result_list(cx: &mut TestAppContext) {
+    let (_directory, _, window, launcher) =
+        open_indexed_test_launcher(cx, &[("alpha.md", "alpha"), ("beta.md", "beta")]);
+    cx.run_until_parked();
+    cx.simulate_keystrokes(window, "ctrl-end");
+    settle_preview(cx);
+    window
+        .update(cx, |_, window, cx| {
+            window.render_frame(cx);
+            let launcher = launcher.read(cx);
+            assert_eq!(launcher.selected_index, Some(1));
+            assert!(launcher.query.read(cx).focus_handle(cx).is_focused(window));
+        })
+        .unwrap();
+    cx.simulate_keystrokes(window, "ctrl-home");
+    settle_preview(cx);
+    cx.update(|cx| assert_eq!(launcher.read(cx).selected_index, Some(0)));
+}
+
+#[gpui_kit::test]
 fn a_removed_result_does_not_leave_keyboard_focus_on_an_invisible_action(cx: &mut TestAppContext) {
     let (_directory, database_path, window, launcher) =
         open_indexed_test_launcher(cx, &[("alpha.md", "alpha"), ("beta.md", "beta")]);

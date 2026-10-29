@@ -51,6 +51,7 @@ through the `global_shortcut` value in the generated configuration file.
 - Results start unselected, including after a query change.
 - Use Down to select the first result, Up to select the last, or click a result.
   Selection loads a read-only preview; clicking does not copy or hide.
+- Press Ctrl+Home/End to jump to the first or last result.
 - Press Enter on a selected, loaded document to focus its read-only preview.
 - In preview, Up/Down and Page Up/Down scroll; Home/End (or Command+Up/Down)
   jump to the beginning/end. These keys do not change the selected result.
