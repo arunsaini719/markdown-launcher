@@ -4,11 +4,10 @@ use gpui_kit::{
     App, Div, ElementId, InteractiveElement as _, ParentElement as _,
     StatefulInteractiveElement as _, Styled as _,
     component::{
-        FocusableExt as _,
         button::{Button, ButtonCustomVariant, ButtonVariants as _},
         tooltip::Tooltip,
     },
-    div, rgb,
+    div, px, rgb,
 };
 
 const ACTION_FOREGROUND: u32 = 0xf4f4f5;
@@ -18,30 +17,26 @@ const PRIMARY_BACKGROUNDS: [u32; 3] = [0x2563eb, 0x1d4ed8, 0x1e40af];
 
 // The workspace stays dark even when GPUI's global theme is light for dialogs.
 // Specify all button states so hovering never produces white-on-white controls.
+// Keep the framework focus ring enabled so keyboard focus stays outside the
+// fixed 8px corner radius without changing control layout.
 pub(crate) fn action_button(id: impl Into<ElementId>, cx: &App) -> Button {
-    Button::new(id)
-        .focus_ring(false)
-        .focus_visible(|style| style.border_color(rgb(0xffffff)))
-        .custom(
-            ButtonCustomVariant::new(cx)
-                .color(rgb(ACTION_BACKGROUNDS[0]).into())
-                .foreground(rgb(ACTION_FOREGROUND).into())
-                .hover(rgb(ACTION_BACKGROUNDS[1]).into())
-                .active(rgb(ACTION_BACKGROUNDS[2]).into()),
-        )
+    Button::new(id).rounded(px(8.0)).custom(
+        ButtonCustomVariant::new(cx)
+            .color(rgb(ACTION_BACKGROUNDS[0]).into())
+            .foreground(rgb(ACTION_FOREGROUND).into())
+            .hover(rgb(ACTION_BACKGROUNDS[1]).into())
+            .active(rgb(ACTION_BACKGROUNDS[2]).into()),
+    )
 }
 
 pub(crate) fn primary_button(id: impl Into<ElementId>, cx: &App) -> Button {
-    Button::new(id)
-        .focus_ring(false)
-        .focus_visible(|style| style.border_color(rgb(0xffffff)))
-        .custom(
-            ButtonCustomVariant::new(cx)
-                .color(rgb(PRIMARY_BACKGROUNDS[0]).into())
-                .foreground(rgb(PRIMARY_FOREGROUND).into())
-                .hover(rgb(PRIMARY_BACKGROUNDS[1]).into())
-                .active(rgb(PRIMARY_BACKGROUNDS[2]).into()),
-        )
+    Button::new(id).rounded(px(8.0)).custom(
+        ButtonCustomVariant::new(cx)
+            .color(rgb(PRIMARY_BACKGROUNDS[0]).into())
+            .foreground(rgb(PRIMARY_FOREGROUND).into())
+            .hover(rgb(PRIMARY_BACKGROUNDS[1]).into())
+            .active(rgb(PRIMARY_BACKGROUNDS[2]).into()),
+    )
 }
 
 pub(crate) fn document_header(mode: &str, path: &Path, hint: &str) -> Div {
