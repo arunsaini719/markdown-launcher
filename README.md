@@ -184,9 +184,9 @@ to finish its current transactional write before exiting.
 The search-and-copy launcher workflow, explicit-selection read-only preview,
 root-constrained note creation, explicit source editing and autosave, native
 settings, local macOS `.app` packaging, menu bar controls, opt-in login startup,
-and single-instance protection are implemented.
-Developer ID signing, notarization, installers, and public release automation
-remain future work.
+single-instance protection, and tag-triggered GitHub prerelease archives are
+implemented. Developer ID signing, notarization, and installers remain future
+work.
 
 ## Platform support
 
