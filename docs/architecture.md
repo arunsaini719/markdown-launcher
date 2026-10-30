@@ -5,27 +5,44 @@
 The application treats Markdown files as durable user data and SQLite as a
 rebuildable local search index.
 
-```text
-Configured filesystem roots
-          |
-          v
-  Scanner and watcher --> Markdown parser --> Index coordinator
-                                                |
-                                                v
-                                         SQLite and FTS5
-                                                |
-                                                v
-                                       Search service
-                                                |
-                                                v
-                                      GPUI Kit launcher
-                                                |
-                                                v
-                                    Current file -> clipboard
+```mermaid
+flowchart LR
+    subgraph durable[Durable user data]
+        files[Configured Markdown roots]
+    end
+
+    subgraph background[Background services]
+        scanner[Scanner and watcher]
+        parser[Bounded Markdown parser]
+        coordinator[Index coordinator]
+        search[Search service]
+    end
+
+    subgraph derived[Rebuildable local state]
+        sqlite[(SQLite and FTS5)]
+    end
+
+    subgraph interface[GPUI Kit interface]
+        launcher[Search and preview]
+        editor[Explicit source editor]
+    end
+
+    files --> scanner --> parser --> coordinator --> sqlite
+    sqlite --> search --> launcher
+    launcher --> editor
+    editor -->|Conflict-aware atomic save| files
+    launcher -->|Current file body| clipboard[System clipboard]
 ```
 
 This separation prevents UI behavior, search technology, and file ownership
-from becoming coupled.
+from becoming coupled. The boundaries are intentional:
+
+- Markdown files are durable user data; SQLite is derived and disposable.
+- Scanning, parsing, search, and file I/O stay outside rendering callbacks.
+- Generation tokens prevent obsolete asynchronous work from replacing new UI
+  state.
+- Every write revalidates roots, exclusions, symlinks, size limits, permissions,
+  and external modifications before atomic replacement.
 
 ## Major components
 
