@@ -30,3 +30,6 @@ jobs:
 
       - name: Run quality checks
         run: ./scripts/check.sh
+
+      - name: Verify macOS application packaging
+        run: ./scripts/build-macos-app.sh
