@@ -41,6 +41,7 @@ Deletion remains deferred.
 - [Product scope](docs/product-scope.md)
 - [Architecture](docs/architecture.md)
 - [Manual setup and native testing](manual_setup.md)
+- [Release process](RELEASING.md)
 - [Changelog](CHANGELOG.md)
 
 ## Launcher controls
