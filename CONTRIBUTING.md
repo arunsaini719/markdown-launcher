@@ -35,10 +35,11 @@ behavior manually.
 Run the same checks used in CI before opening a pull request:
 
 ```sh
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all-targets --all-features
+./scripts/check.sh
 ```
+
+The script checks formatting, runs Clippy with warnings denied, and executes all
+targets with every feature enabled.
 
 Behavior changes should include focused tests. Filesystem behavior must cover
 failure and race conditions where practical, especially around symlinks,

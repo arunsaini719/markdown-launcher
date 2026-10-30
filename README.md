@@ -225,9 +225,7 @@ open "dist/Markdown Launcher.app"
 Run the local quality checks:
 
 ```sh
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all-targets --all-features
+./scripts/check.sh
 ```
 
 ## Contributing

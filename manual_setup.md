@@ -22,10 +22,11 @@ Check the toolchain and project before building:
 
 ```sh
 rustc --version
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all-targets --all-features
+./scripts/check.sh
 ```
+
+The check script verifies formatting, denies Clippy warnings, and runs all test
+targets with every feature enabled.
 
 ## Part 1: Development testing with `cargo run`
 
