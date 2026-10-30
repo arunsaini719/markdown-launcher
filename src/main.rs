@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, process::ExitCode};
 
 use gpui_kit::{
     ActivationPolicy, App, AppContext as _, Bounds, WindowBounds, WindowKind, WindowOptions, px,
@@ -11,13 +11,70 @@ use markdown_snippet_manager::{
     launcher::{Launcher, LauncherServices, RegisteredGlobalShortcut, init_launcher},
 };
 
-fn main() {
-    if let Err(error) = run() {
-        eprintln!("failed to start Markdown Launcher: {error}");
+#[derive(Debug, PartialEq, Eq)]
+enum StartupCommand {
+    Launch,
+    Help,
+    Version,
+}
+
+fn main() -> ExitCode {
+    match run() {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("Markdown Launcher: {error}");
+            ExitCode::FAILURE
+        }
     }
 }
 
 fn run() -> Result<(), Box<dyn Error>> {
+    match parse_startup_command(std::env::args().skip(1)).map_err(std::io::Error::other)? {
+        StartupCommand::Help => {
+            print!("{}", help_text());
+            return Ok(());
+        }
+        StartupCommand::Version => {
+            println!("Markdown Launcher {}", env!("CARGO_PKG_VERSION"));
+            return Ok(());
+        }
+        StartupCommand::Launch => {}
+    }
+    run_application()
+}
+
+fn parse_startup_command(args: impl IntoIterator<Item = String>) -> Result<StartupCommand, String> {
+    let mut args = args.into_iter();
+    let Some(argument) = args.next() else {
+        return Ok(StartupCommand::Launch);
+    };
+    if args.next().is_some() {
+        return Err("expected at most one option; run with --help for usage".into());
+    }
+    match argument.as_str() {
+        "-h" | "--help" => Ok(StartupCommand::Help),
+        "-V" | "--version" => Ok(StartupCommand::Version),
+        _ => Err(format!(
+            "unknown option '{argument}'; run with --help for usage"
+        )),
+    }
+}
+
+fn help_text() -> String {
+    format!(
+        concat!(
+            "Markdown Launcher {version}\n",
+            "A local-first, keyboard-driven Markdown launcher.\n\n",
+            "Usage: markdown-snippet-manager [OPTIONS]\n\n",
+            "Options:\n",
+            "  -h, --help       Print help\n",
+            "  -V, --version    Print version\n",
+        ),
+        version = env!("CARGO_PKG_VERSION")
+    )
+}
+
+fn run_application() -> Result<(), Box<dyn Error>> {
     let paths = AppPaths::discover()?;
     let lock_file = paths.config_file.with_file_name("application.lock");
     let Some(single_instance) =
@@ -116,6 +173,47 @@ fn combine_warnings(first: Option<String>, second: Option<String>) -> Option<Str
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parses_informational_startup_options_without_launching_the_app() {
+        assert_eq!(
+            parse_startup_command(Vec::<String>::new()).unwrap(),
+            StartupCommand::Launch
+        );
+        for option in ["-h", "--help"] {
+            assert_eq!(
+                parse_startup_command(vec![option.into()]).unwrap(),
+                StartupCommand::Help
+            );
+        }
+        for option in ["-V", "--version"] {
+            assert_eq!(
+                parse_startup_command(vec![option.into()]).unwrap(),
+                StartupCommand::Version
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_unknown_or_multiple_startup_options() {
+        assert!(
+            parse_startup_command(vec!["--unknown".into()])
+                .unwrap_err()
+                .contains("unknown option")
+        );
+        assert!(
+            parse_startup_command(vec!["--help".into(), "--version".into()])
+                .unwrap_err()
+                .contains("at most one")
+        );
+    }
+
+    #[test]
+    fn help_includes_the_binary_name_and_package_version() {
+        let help = help_text();
+        assert!(help.contains("markdown-snippet-manager [OPTIONS]"));
+        assert!(help.contains(env!("CARGO_PKG_VERSION")));
+    }
 
     #[test]
     fn workspace_and_component_icons_have_renderable_bundled_artwork() {

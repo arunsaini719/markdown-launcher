@@ -215,6 +215,14 @@ Run the development application:
 cargo run
 ```
 
+Inspect the binary version or command-line help without starting the desktop
+application:
+
+```sh
+cargo run -- --version
+cargo run -- --help
+```
+
 Build a local, ad-hoc-signed macOS application:
 
 ```sh
