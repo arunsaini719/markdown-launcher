@@ -230,6 +230,15 @@ Build a local, ad-hoc-signed macOS application:
 open "dist/Markdown Launcher.app"
 ```
 
+Create a versioned release archive and SHA-256 checksum:
+
+```sh
+./scripts/package-macos-release.sh
+```
+
+The generated application is ad-hoc signed for local testing and is not
+notarized for public distribution.
+
 Run the local quality checks:
 
 ```sh
