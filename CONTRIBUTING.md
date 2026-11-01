@@ -39,7 +39,9 @@ Run the same checks used in CI before opening a pull request:
 ```
 
 The script checks formatting, runs Clippy with warnings denied, and executes all
-targets with every feature enabled.
+targets with every feature enabled. Pull requests that change dependency
+manifests or lockfiles also receive an automated dependency review; newly
+introduced vulnerabilities at moderate severity or higher block that check.
 
 Behavior changes should include focused tests. Filesystem behavior must cover
 failure and race conditions where practical, especially around symlinks,

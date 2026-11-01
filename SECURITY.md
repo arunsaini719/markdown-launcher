@@ -22,6 +22,10 @@ include:
 - The expected and observed security boundaries
 - Any suggested mitigation
 
+Dependency-changing pull requests are checked for newly introduced known
+vulnerabilities at moderate severity or higher. This automated review supplements
+rather than replaces responsible disclosure and maintainer review.
+
 Reports involving arbitrary file access, symlink traversal, unsafe replacement
 of Markdown files, unintended network access, or exposure of local note content
 are especially useful. Remove personal notes, credentials, access tokens, and
