@@ -16,7 +16,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Root-constrained note creation with collision-safe atomic publication
 - Explicit source editing with autosave and external-change detection
 - Native macOS menu bar controls, settings, Launch at Login, and app packaging
-- Tag-triggered, architecture-specific macOS prerelease archives with checksums
+- Tag-triggered Apple Silicon and Intel macOS prerelease archives with checksums
 - Non-launching commands to locate application files and validate configuration
 
 ### Security

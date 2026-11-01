@@ -186,15 +186,16 @@ to finish its current transactional write before exiting.
 The search-and-copy launcher workflow, explicit-selection read-only preview,
 root-constrained note creation, explicit source editing and autosave, native
 settings, local macOS `.app` packaging, menu bar controls, opt-in login startup,
-single-instance protection, and tag-triggered GitHub prerelease archives are
-implemented. Developer ID signing, notarization, and installers remain future
+single-instance protection, and tag-triggered Apple Silicon and Intel GitHub
+prerelease archives are implemented. Developer ID signing, notarization, and installers remain future
 work.
 
 ## Platform support
 
 macOS 15 or later is the primary supported desktop platform and includes local
 `.app` packaging, menu bar controls, Launch at Login, and single-instance
-protection. The core application also builds on Linux; native global shortcuts
+protection. Tagged prereleases provide separate native `arm64` and `x86_64`
+archives. The core application also builds on Linux; native global shortcuts
 require an X11 session. Signed and notarized release binaries are not available
 yet.
 

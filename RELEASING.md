@@ -48,8 +48,10 @@ Pushing the tag starts `.github/workflows/release.yml`. The workflow:
 1. Verifies the tag against `Cargo.toml`.
 2. Runs formatting, Clippy, and all tests.
 3. Builds and ad-hoc signs the macOS application.
-4. Creates an architecture-specific ZIP and SHA-256 checksum.
-5. Publishes both files as a GitHub prerelease.
+4. Builds separate Apple Silicon (`arm64`) and Intel (`x86_64`) application
+   archives on native GitHub-hosted runners.
+5. Verifies both SHA-256 checksums after downloading the isolated build outputs.
+6. Publishes both archives and checksums as a single GitHub prerelease.
 
 ## 3. Verify the GitHub prerelease
 
@@ -57,14 +59,15 @@ Download the archive and checksum from a different directory or machine, then
 verify them before sharing the link:
 
 ```sh
-shasum -a 256 -c markdown-launcher-v0.1.0-macos-arm64.zip.sha256
-ditto -x -k markdown-launcher-v0.1.0-macos-arm64.zip extracted
+shasum -a 256 -c markdown-launcher-v0.1.0-macos-$(uname -m).zip.sha256
+ditto -x -k markdown-launcher-v0.1.0-macos-$(uname -m).zip extracted
 codesign --verify --deep --strict "extracted/Markdown Launcher.app"
 "extracted/Markdown Launcher.app/Contents/MacOS/markdown-snippet-manager" --version
 ```
 
-Confirm that the release remains marked as a prerelease and clearly states that
-the application is not Developer ID signed or notarized.
+Confirm that the release contains `arm64` and `x86_64` archives with matching
+checksum files, remains marked as a prerelease, and clearly states that the
+applications are not Developer ID signed or notarized.
 
 ## Correcting a failed release
 
