@@ -82,12 +82,13 @@ through the `global_shortcut` value in the generated configuration file.
   recommended defaults and can restore them to the unsaved draft. Saved changes
   apply after restarting the app.
 - On macOS, press Command+Q or choose **Quit Markdown Launcher** from the menu
-  bar item to stop the resident application.
+  bar item to stop the resident application. Choose **Reveal Configuration File**
+to locate the active TOML file in Finder.
 
 The application remains resident while the launcher is hidden so indexing and
 filesystem synchronization can continue. On macOS, its menu bar item provides
-**Open Launcher**, **Settings...**, **Rebuild Index**, **Launch at Login**, and
-**Quit Markdown Launcher** actions. Launch at Login is disabled by default and
+**Open Launcher**, **Settings...**, **Reveal Configuration File**,
+**Rebuild Index**, **Launch at Login**, and **Quit Markdown Launcher** actions. Launch at Login is disabled by default and
 can be toggled explicitly after installing the app. Only one macOS application
 instance runs at a time.
 

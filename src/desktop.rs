@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 pub enum DesktopMenuAction {
     OpenLauncher,
     OpenSettings,
+    RevealConfiguration,
     RebuildIndex,
     ToggleLaunchAtLogin,
     Quit,
@@ -21,6 +22,7 @@ pub enum LaunchAtLoginChange {
 
 const OPEN_LAUNCHER_ID: &str = "open-launcher";
 const OPEN_SETTINGS_ID: &str = "open-settings";
+const REVEAL_CONFIGURATION_ID: &str = "reveal-configuration";
 const REBUILD_INDEX_ID: &str = "rebuild-index";
 const TOGGLE_LAUNCH_AT_LOGIN_ID: &str = "toggle-launch-at-login";
 const QUIT_ID: &str = "quit";
@@ -93,6 +95,12 @@ impl DesktopMenu {
                 login_item_presentation(login_service.status(), can_register_login_item);
             let open = MenuItem::with_id(OPEN_LAUNCHER_ID, "Open Launcher", true, None);
             let settings = MenuItem::with_id(OPEN_SETTINGS_ID, "Settings…", true, None);
+            let reveal_configuration = MenuItem::with_id(
+                REVEAL_CONFIGURATION_ID,
+                "Reveal Configuration File",
+                true,
+                None,
+            );
             let rebuild = MenuItem::with_id(REBUILD_INDEX_ID, "Rebuild Index", true, None);
             let action_separator = PredefinedMenuItem::separator();
             let launch_at_login_item = CheckMenuItem::with_id(
@@ -107,6 +115,7 @@ impl DesktopMenu {
             let menu = Menu::with_items(&[
                 &open,
                 &settings,
+                &reveal_configuration,
                 &rebuild,
                 &action_separator,
                 &launch_at_login_item,
@@ -233,10 +242,33 @@ impl DesktopMenu {
     }
 }
 
+pub fn reveal_configuration_file(path: &Path) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let status = std::process::Command::new("/usr/bin/open")
+            .arg("-R")
+            .arg(path)
+            .status()
+            .map_err(|error| format!("could not open Finder: {error}"))?;
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("Finder exited with status {status}"))
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = path;
+        Err("revealing the configuration file is available only on macOS".into())
+    }
+}
+
 fn action_for_menu_id(id: &str) -> Option<DesktopMenuAction> {
     match id {
         OPEN_LAUNCHER_ID => Some(DesktopMenuAction::OpenLauncher),
         OPEN_SETTINGS_ID => Some(DesktopMenuAction::OpenSettings),
+        REVEAL_CONFIGURATION_ID => Some(DesktopMenuAction::RevealConfiguration),
         REBUILD_INDEX_ID => Some(DesktopMenuAction::RebuildIndex),
         TOGGLE_LAUNCH_AT_LOGIN_ID => Some(DesktopMenuAction::ToggleLaunchAtLogin),
         QUIT_ID => Some(DesktopMenuAction::Quit),
@@ -376,6 +408,10 @@ mod tests {
         assert_eq!(
             action_for_menu_id(OPEN_SETTINGS_ID),
             Some(DesktopMenuAction::OpenSettings)
+        );
+        assert_eq!(
+            action_for_menu_id(REVEAL_CONFIGURATION_ID),
+            Some(DesktopMenuAction::RevealConfiguration)
         );
         assert_eq!(
             action_for_menu_id(REBUILD_INDEX_ID),

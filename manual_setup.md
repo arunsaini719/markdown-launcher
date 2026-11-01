@@ -190,8 +190,10 @@ launcher is visible to edit the supported values. The TOML file remains
 available for manual editing. Changes saved through either method require an
 application restart.
 
-The executable can report the platform-specific paths instead of requiring you
-to derive them from this guide:
+On macOS, **Reveal Configuration File** in the menu bar item opens Finder with
+the active TOML file selected. The executable can also report the
+platform-specific paths instead of requiring you to derive them from this
+guide:
 
 ```sh
 cargo run -- --print-paths

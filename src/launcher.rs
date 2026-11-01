@@ -29,7 +29,10 @@ use gpui_kit::{
 
 use crate::{
     config::ScanConfig,
-    desktop::{DesktopMenu, DesktopMenuAction, LaunchAtLoginChange, SingleInstanceGuard},
+    desktop::{
+        DesktopMenu, DesktopMenuAction, LaunchAtLoginChange, SingleInstanceGuard,
+        reveal_configuration_file,
+    },
     editor::{EDITOR_KEY_CONTEXT, EditorEvent, EditorWorkspace},
     index::{
         IndexActivity, IndexDatabase, IndexWatchService, SearchResult, WatchServiceStatus,
@@ -601,6 +604,10 @@ impl Launcher {
                                 launcher.show_settings(window, cx);
                                 true
                             }
+                            Some(DesktopMenuAction::RevealConfiguration) => {
+                                launcher.reveal_configuration(window, cx);
+                                true
+                            }
                             Some(DesktopMenuAction::RebuildIndex) => {
                                 launcher.request_rebuild(cx);
                                 true
@@ -687,6 +694,19 @@ impl Launcher {
                 self.action_status = Some(format!("Could not open settings: {error}"));
                 cx.notify();
             }
+        }
+    }
+
+    fn reveal_configuration(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let result = self
+            .config_file
+            .as_deref()
+            .ok_or_else(|| "the configuration path is unavailable".to_string())
+            .and_then(reveal_configuration_file);
+        if let Err(error) = result {
+            self.show_launcher(window, cx);
+            self.action_status = Some(format!("Could not reveal configuration: {error}"));
+            cx.notify();
         }
     }
 
