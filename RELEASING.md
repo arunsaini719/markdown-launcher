@@ -51,7 +51,8 @@ Pushing the tag starts `.github/workflows/release.yml`. The workflow:
 4. Builds separate Apple Silicon (`arm64`) and Intel (`x86_64`) application
    archives on native GitHub-hosted runners.
 5. Verifies both SHA-256 checksums after downloading the isolated build outputs.
-6. Publishes both archives and checksums as a single GitHub prerelease.
+6. Records signed GitHub build-provenance attestations for both archives.
+7. Publishes both archives and checksums as a single GitHub prerelease.
 
 ## 3. Verify the GitHub prerelease
 
@@ -60,14 +61,17 @@ verify them before sharing the link:
 
 ```sh
 shasum -a 256 -c markdown-launcher-v0.1.0-macos-$(uname -m).zip.sha256
+gh attestation verify markdown-launcher-v0.1.0-macos-$(uname -m).zip \
+  --repo arunsaini719/markdown-launcher
 ditto -x -k markdown-launcher-v0.1.0-macos-$(uname -m).zip extracted
 codesign --verify --deep --strict "extracted/Markdown Launcher.app"
 "extracted/Markdown Launcher.app/Contents/MacOS/markdown-snippet-manager" --version
 ```
 
 Confirm that the release contains `arm64` and `x86_64` archives with matching
-checksum files, remains marked as a prerelease, and clearly states that the
-applications are not Developer ID signed or notarized.
+checksum files, both provenance attestations verify against this repository,
+and the release remains marked as a prerelease. It must still clearly state
+that the applications are not Developer ID signed or notarized.
 
 ## Correcting a failed release
 

@@ -23,8 +23,10 @@ include:
 - Any suggested mitigation
 
 Dependency-changing pull requests are checked for newly introduced known
-vulnerabilities at moderate severity or higher. This automated review supplements
-rather than replaces responsible disclosure and maintainer review.
+vulnerabilities at moderate severity or higher. Tagged release archives receive
+signed GitHub build-provenance attestations so downloaded artifacts can be
+verified against this repository. These automated controls supplement rather
+than replace responsible disclosure and maintainer review.
 
 Reports involving arbitrary file access, symlink traversal, unsafe replacement
 of Markdown files, unintended network access, or exposure of local note content

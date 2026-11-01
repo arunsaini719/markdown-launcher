@@ -24,6 +24,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Root, exclusion, extension, size, permission, and symlink checks before writes
 - Conflict-aware atomic replacement that refuses external modifications
 - Local-only preview rendering that never fetches linked remote resources
+- Signed GitHub build-provenance attestations for tagged release archives
 
 ### Known limitations
 
