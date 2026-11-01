@@ -190,6 +190,23 @@ launcher is visible to edit the supported values. The TOML file remains
 available for manual editing. Changes saved through either method require an
 application restart.
 
+The executable can report the platform-specific paths instead of requiring you
+to derive them from this guide:
+
+```sh
+cargo run -- --print-paths
+```
+
+After manually changing `config.toml`, validate it without starting the desktop
+application or touching the existing file:
+
+```sh
+cargo run -- --check-config
+```
+
+A valid file prints its path and exits successfully. A missing, malformed, or
+invalid file produces a nonzero exit status and a diagnostic on stderr.
+
 SQLite is a derived search index. Deleting it does not delete or modify any
 Markdown source files.
 

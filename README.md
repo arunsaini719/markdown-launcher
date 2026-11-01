@@ -217,13 +217,18 @@ Run the development application:
 cargo run
 ```
 
-Inspect the binary version or command-line help without starting the desktop
-application:
+Inspect the binary, locate its application files, or validate a manually edited
+configuration without starting the desktop application:
 
 ```sh
 cargo run -- --version
 cargo run -- --help
+cargo run -- --print-paths
+cargo run -- --check-config
 ```
+
+`--check-config` reads the existing configuration without creating or rewriting
+it. An invalid file produces a nonzero exit status and a diagnostic on stderr.
 
 Build a local, ad-hoc-signed macOS application:
 

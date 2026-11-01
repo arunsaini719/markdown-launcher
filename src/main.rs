@@ -1,4 +1,4 @@
-use std::{error::Error, process::ExitCode};
+use std::{error::Error, path::Path, process::ExitCode};
 
 use gpui_kit::{
     ActivationPolicy, App, AppContext as _, Bounds, WindowBounds, WindowKind, WindowOptions, px,
@@ -16,6 +16,8 @@ enum StartupCommand {
     Launch,
     Help,
     Version,
+    PrintPaths,
+    CheckConfig,
 }
 
 fn main() -> ExitCode {
@@ -38,6 +40,18 @@ fn run() -> Result<(), Box<dyn Error>> {
             println!("Markdown Launcher {}", env!("CARGO_PKG_VERSION"));
             return Ok(());
         }
+        StartupCommand::PrintPaths => {
+            let paths = AppPaths::discover()?;
+            println!("Configuration: {}", paths.config_file.display());
+            println!("Index: {}", paths.database_file.display());
+            return Ok(());
+        }
+        StartupCommand::CheckConfig => {
+            let paths = AppPaths::discover()?;
+            validate_configuration(&paths.config_file)?;
+            println!("Configuration is valid: {}", paths.config_file.display());
+            return Ok(());
+        }
         StartupCommand::Launch => {}
     }
     run_application()
@@ -54,6 +68,8 @@ fn parse_startup_command(args: impl IntoIterator<Item = String>) -> Result<Start
     match argument.as_str() {
         "-h" | "--help" => Ok(StartupCommand::Help),
         "-V" | "--version" => Ok(StartupCommand::Version),
+        "--print-paths" => Ok(StartupCommand::PrintPaths),
+        "--check-config" => Ok(StartupCommand::CheckConfig),
         _ => Err(format!(
             "unknown option '{argument}'; run with --help for usage"
         )),
@@ -69,9 +85,17 @@ fn help_text() -> String {
             "Options:\n",
             "  -h, --help       Print help\n",
             "  -V, --version    Print version\n",
+            "      --print-paths Show configuration and index paths\n",
+            "      --check-config Validate the configuration without launching\n",
         ),
         version = env!("CARGO_PKG_VERSION")
     )
+}
+
+fn validate_configuration(path: &Path) -> Result<AppConfig, Box<dyn Error>> {
+    let mut config = AppConfig::load_for_editing(path)?;
+    config.normalize_and_validate()?;
+    Ok(config)
 }
 
 fn run_application() -> Result<(), Box<dyn Error>> {
@@ -192,6 +216,14 @@ mod tests {
                 StartupCommand::Version
             );
         }
+        assert_eq!(
+            parse_startup_command(vec!["--print-paths".into()]).unwrap(),
+            StartupCommand::PrintPaths
+        );
+        assert_eq!(
+            parse_startup_command(vec!["--check-config".into()]).unwrap(),
+            StartupCommand::CheckConfig
+        );
     }
 
     #[test]
@@ -213,6 +245,36 @@ mod tests {
         let help = help_text();
         assert!(help.contains("markdown-snippet-manager [OPTIONS]"));
         assert!(help.contains(env!("CARGO_PKG_VERSION")));
+        assert!(help.contains("--print-paths"));
+        assert!(help.contains("--check-config"));
+    }
+
+    #[test]
+    fn validates_configuration_without_creating_or_rewriting_it() {
+        let directory = tempfile::tempdir().expect("temporary directory");
+        let config_file = directory.path().join("config.toml");
+        let config = AppConfig::default_for_home(directory.path());
+        config.save(&config_file).expect("save valid config");
+        let original = std::fs::read_to_string(&config_file).expect("read valid config");
+
+        assert_eq!(
+            validate_configuration(&config_file)
+                .expect("validate config")
+                .scan
+                .roots,
+            vec![directory.path().to_path_buf()]
+        );
+        assert_eq!(
+            std::fs::read_to_string(&config_file).expect("reread valid config"),
+            original
+        );
+
+        std::fs::write(&config_file, "unknown = true\n").expect("write invalid config");
+        assert!(validate_configuration(&config_file).is_err());
+        assert_eq!(
+            std::fs::read_to_string(&config_file).expect("reread invalid config"),
+            "unknown = true\n"
+        );
     }
 
     #[test]
