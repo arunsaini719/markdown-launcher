@@ -30,7 +30,33 @@ Start from a clean, current `main` branch with a successful CI run.
 Commit the version and changelog together with a message such as
 `Prepare v0.1.0` and wait for CI to pass.
 
-## 2. Create the release tag
+## 2. Exercise the release workflow
+
+Before creating a tag, run the Release workflow manually from the committed
+version branch:
+
+```sh
+gh workflow run release.yml --ref main
+gh run watch --exit-status
+```
+
+A manual run builds both native macOS architectures and uploads the archives as
+short-lived workflow artifacts, but it skips provenance attestation and release
+publication. Download and inspect the artifacts when packaging code, runner
+images, or dependencies have changed:
+
+```sh
+rm -rf dist/dry-run
+gh run download --dir dist/dry-run
+find dist/dry-run -name '*.sha256' | while IFS= read -r checksum; do
+  (cd "$(dirname "$checksum")" && shasum -a 256 -c "$(basename "$checksum")")
+done
+```
+
+Wait for this dry run to pass before tagging. It is an additional release
+check, not a substitute for the required branch CI and local verification.
+
+## 3. Create the release tag
 
 The workflow requires an existing `v`-prefixed semantic version tag that exactly
 matches the Cargo package version.
@@ -54,7 +80,7 @@ Pushing the tag starts `.github/workflows/release.yml`. The workflow:
 6. Records signed GitHub build-provenance attestations for both archives.
 7. Publishes both archives and checksums as a single GitHub prerelease.
 
-## 3. Verify the GitHub prerelease
+## 4. Verify the GitHub prerelease
 
 Download the archive and checksum from a different directory or machine, then
 verify them before sharing the link:

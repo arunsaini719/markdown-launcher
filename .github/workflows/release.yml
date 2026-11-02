@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,6 +38,7 @@ jobs:
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
 
       - name: Verify tag matches package version
+        if: github.event_name == 'push'
         run: |
           version="$(cargo metadata --locked --no-deps --format-version 1 | python3 -c 'import json, sys; data = json.load(sys.stdin); print(next(package["version"] for package in data["packages"] if package["name"] == "markdown-snippet-manager"))')"
           test "$GITHUB_REF_NAME" = "v$version"
@@ -62,6 +64,7 @@ jobs:
 
   publish:
     name: Publish GitHub prerelease
+    if: github.event_name == 'push'
     needs: macos
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -83,7 +86,7 @@ jobs:
 
       - name: Verify archive checksums
         working-directory: dist
-        run: sha256sum --check *.sha256
+        run: sha256sum --check -- *.sha256
 
       - name: Attest archive provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
