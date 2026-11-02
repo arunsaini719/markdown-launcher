@@ -42,6 +42,8 @@ The script checks formatting, runs Clippy with warnings denied, and executes all
 targets with every feature enabled. Pull requests that change dependency
 manifests or lockfiles also receive an automated dependency review; newly
 introduced vulnerabilities at moderate severity or higher block that check.
+The complete lockfile also receives a RustSec audit when dependency files
+change; informational maintenance warnings are reported without blocking.
 
 Behavior changes should include focused tests. Filesystem behavior must cover
 failure and race conditions where practical, especially around symlinks,

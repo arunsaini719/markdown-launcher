@@ -1,6 +1,7 @@
 # Markdown Launcher
 
 [![CI](https://github.com/arunsaini719/markdown-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/arunsaini719/markdown-launcher/actions/workflows/ci.yml)
+[![Security audit](https://github.com/arunsaini719/markdown-launcher/actions/workflows/security-audit.yml/badge.svg)](https://github.com/arunsaini719/markdown-launcher/actions/workflows/security-audit.yml)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 
 A local-first, keyboard-driven desktop launcher for finding, previewing, and

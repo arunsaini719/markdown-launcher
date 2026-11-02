@@ -27,6 +27,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Local-only preview rendering that never fetches linked remote resources
 - Signed GitHub build-provenance attestations for tagged release archives
 - Audited TLS, certificate-verification, and async-runtime dependency fixes
+- Pull-request and scheduled RustSec audits for the complete dependency lockfile
 
 ### Known limitations
 

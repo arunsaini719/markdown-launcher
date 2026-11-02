@@ -23,9 +23,12 @@ include:
 - Any suggested mitigation
 
 Dependency-changing pull requests are checked for newly introduced known
-vulnerabilities at moderate severity or higher. Tagged release archives receive
-signed GitHub build-provenance attestations so downloaded artifacts can be
-verified against this repository. These automated controls supplement rather
+vulnerabilities at moderate severity or higher. The complete Rust lockfile is
+also scanned against RustSec whenever dependencies change, every Monday, and on
+demand. GitHub Dependabot alerts and security updates are enabled for newly
+reported advisories. Tagged release archives receive signed GitHub
+build-provenance attestations so downloaded artifacts can be verified against
+this repository. These automated controls supplement rather
 than replace responsible disclosure and maintainer review.
 
 Reports involving arbitrary file access, symlink traversal, unsafe replacement
