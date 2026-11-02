@@ -227,11 +227,13 @@ configuration without starting the desktop application:
 cargo run -- --version
 cargo run -- --help
 cargo run -- --print-paths
+cargo run -- --shortcuts
 cargo run -- --check-config
 cargo run -- --check-index
 cargo run -- --diagnostics
 ```
 
+`--shortcuts` prints the complete keyboard reference grouped by focus context.
 `--check-config` reads the existing configuration without creating or rewriting
 it. `--check-index` verifies SQLite integrity, the schema, and the document count
 through a read-only connection; it never migrates, recovers, or creates an

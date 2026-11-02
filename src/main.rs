@@ -20,6 +20,7 @@ enum StartupCommand {
     CheckConfig,
     CheckIndex,
     Diagnostics,
+    Shortcuts,
 }
 
 fn main() -> ExitCode {
@@ -46,6 +47,10 @@ fn run() -> Result<(), Box<dyn Error>> {
             let paths = AppPaths::discover()?;
             println!("Configuration: {}", paths.config_file.display());
             println!("Index: {}", paths.database_file.display());
+            return Ok(());
+        }
+        StartupCommand::Shortcuts => {
+            print!("{}", shortcuts_text());
             return Ok(());
         }
         StartupCommand::CheckConfig => {
@@ -85,6 +90,7 @@ fn parse_startup_command(args: impl IntoIterator<Item = String>) -> Result<Start
         "-h" | "--help" => Ok(StartupCommand::Help),
         "-V" | "--version" => Ok(StartupCommand::Version),
         "--print-paths" => Ok(StartupCommand::PrintPaths),
+        "--shortcuts" => Ok(StartupCommand::Shortcuts),
         "--check-config" => Ok(StartupCommand::CheckConfig),
         "--check-index" => Ok(StartupCommand::CheckIndex),
         "--diagnostics" => Ok(StartupCommand::Diagnostics),
@@ -104,11 +110,45 @@ fn help_text() -> String {
             "  -h, --help       Print help\n",
             "  -V, --version    Print version\n",
             "      --print-paths Show configuration and index paths\n",
+            "      --shortcuts   Print the keyboard shortcut reference\n",
             "      --check-config Validate the configuration without launching\n",
             "      --check-index  Check index integrity without recovery or migration\n",
             "      --diagnostics  Print a privacy-conscious support report\n",
         ),
         version = env!("CARGO_PKG_VERSION")
+    )
+}
+
+fn shortcuts_text() -> &'static str {
+    concat!(
+        "Keyboard shortcuts\n\n",
+        "Launcher\n",
+        "  Command/Ctrl+Shift+Space  Show or hide the launcher (default)\n",
+        "  Command/Ctrl+Shift+R      Rebuild the search index\n",
+        "  Command/Ctrl+N            Create a note\n",
+        "  Command/Ctrl+E            Edit the selected note\n",
+        "  Command/Ctrl+Shift+C      Copy the Markdown body and hide\n",
+        "  Escape                   Return to search, clear search, or hide\n\n",
+        "Search results\n",
+        "  Up/Down                  Move the result selection\n",
+        "  Ctrl+Home/End            Select the first or last result\n",
+        "  Enter                    Focus the selected note preview\n\n",
+        "Preview\n",
+        "  Up/Down, Page Up/Down    Scroll the rendered note\n",
+        "  Home/End, Command+Up/Down  Jump to the beginning or end\n",
+        "  Command/Ctrl+A           Select all rendered text\n",
+        "  Command/Ctrl+C           Copy selected rendered text\n\n",
+        "Editor\n",
+        "  Command/Ctrl+S           Save immediately\n",
+        "  Command/Ctrl+A           Select all source text\n",
+        "  Command/Ctrl+C           Copy selected source text\n",
+        "  Escape                   Submit changes and return to preview\n\n",
+        "New note\n",
+        "  Enter                    Create the note when valid\n",
+        "  Escape                   Cancel without creating a file\n\n",
+        "macOS\n",
+        "  Command+,                Open settings\n",
+        "  Command+Q                Quit Markdown Launcher\n",
     )
 }
 
@@ -281,6 +321,10 @@ mod tests {
             StartupCommand::PrintPaths
         );
         assert_eq!(
+            parse_startup_command(vec!["--shortcuts".into()]).unwrap(),
+            StartupCommand::Shortcuts
+        );
+        assert_eq!(
             parse_startup_command(vec!["--check-config".into()]).unwrap(),
             StartupCommand::CheckConfig
         );
@@ -314,9 +358,29 @@ mod tests {
         assert!(help.contains("markdown-snippet-manager [OPTIONS]"));
         assert!(help.contains(env!("CARGO_PKG_VERSION")));
         assert!(help.contains("--print-paths"));
+        assert!(help.contains("--shortcuts"));
         assert!(help.contains("--check-config"));
         assert!(help.contains("--check-index"));
         assert!(help.contains("--diagnostics"));
+    }
+
+    #[test]
+    fn shortcut_reference_covers_each_keyboard_context() {
+        let shortcuts = shortcuts_text();
+
+        for context in [
+            "Launcher",
+            "Search results",
+            "Preview",
+            "Editor",
+            "New note",
+            "macOS",
+        ] {
+            assert!(shortcuts.contains(context));
+        }
+        assert!(shortcuts.contains("Command/Ctrl+Shift+Space"));
+        assert!(shortcuts.contains("Ctrl+Home/End"));
+        assert!(shortcuts.contains("Command/Ctrl+S"));
     }
 
     #[test]

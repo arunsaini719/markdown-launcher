@@ -23,9 +23,14 @@ VERSION_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --version)"
 
 HELP_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --help)"
 grep -q -- "--print-paths" <<<"$HELP_OUTPUT"
+grep -q -- "--shortcuts" <<<"$HELP_OUTPUT"
 grep -q -- "--check-config" <<<"$HELP_OUTPUT"
 grep -q -- "--check-index" <<<"$HELP_OUTPUT"
 grep -q -- "--diagnostics" <<<"$HELP_OUTPUT"
+
+SHORTCUTS_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --shortcuts)"
+grep -q "Search results" <<<"$SHORTCUTS_OUTPUT"
+grep -q "Command/Ctrl+Shift+C" <<<"$SHORTCUTS_OUTPUT"
 
 PATHS_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --print-paths)"
 CONFIG_PATH="$(awk 'sub(/^Configuration: /, "") { print; exit }' <<<"$PATHS_OUTPUT")"
