@@ -4,9 +4,7 @@
 
 ## Validation
 
-- [ ] `cargo fmt --check`
-- [ ] `cargo clippy --locked --all-targets --all-features -- -D warnings`
-- [ ] `cargo test --locked --all-targets --all-features`
+- [ ] `./scripts/check.sh`
 - [ ] Relevant manual keyboard and pointer workflows were exercised
 
 ## Platform coverage

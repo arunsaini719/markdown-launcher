@@ -12,3 +12,7 @@ cargo clippy --locked --all-targets --all-features -- -D warnings
 
 echo "Running all tests..."
 cargo test --locked --all-targets --all-features
+
+echo "Running isolated CLI smoke checks..."
+cargo build --locked --bin markdown-snippet-manager
+"$ROOT_DIR/scripts/smoke-cli.sh" "$ROOT_DIR/target/debug/markdown-snippet-manager"

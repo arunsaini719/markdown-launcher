@@ -252,11 +252,14 @@ Create a versioned release archive and SHA-256 checksum:
 The generated application is ad-hoc signed for local testing and is not
 notarized for public distribution.
 
-Run the local quality checks:
+Run the local quality checks, including isolated command-line smoke tests:
 
 ```sh
 ./scripts/check.sh
 ```
+
+The smoke test uses a temporary home directory and never reads or modifies the
+real configuration, index, or Markdown notes.
 
 ## Contributing
 
