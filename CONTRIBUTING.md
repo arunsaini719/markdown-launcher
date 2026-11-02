@@ -19,6 +19,8 @@ Read these documents before changing core behavior:
 Install Rust 1.99 or later and the native dependencies from the
 [GPUI Kit installation guide](https://gpui-kit.com/docs/installation). The
 checked-in toolchain file selects the expected Rust version and components.
+Install [ShellCheck](https://www.shellcheck.net/) to lint packaging and support
+scripts locally (`brew install shellcheck` on macOS).
 
 Run the application during development with:
 
@@ -36,14 +38,17 @@ Run the same checks used in CI before opening a pull request:
 
 ```sh
 ./scripts/check.sh
+shellcheck scripts/*.sh
 ```
 
 The script checks formatting, runs Clippy with warnings denied, and executes all
 targets with every feature enabled. Dependency-consuming commands use
 `--locked`, so validation fails instead of silently rewriting `Cargo.lock`.
 The script also runs the non-launching CLI against an isolated temporary home,
-covering valid, missing, and malformed configuration without touching user data. Pull requests that change dependency
-manifests or lockfiles also receive an automated dependency review; newly
+covering valid, missing, and malformed configuration without touching user data.
+CI runs ShellCheck separately so unsafe quoting and non-portable shell behavior
+fail quickly without waiting for the macOS Rust build. Pull requests that change
+dependency manifests or lockfiles also receive an automated dependency review; newly
 introduced vulnerabilities at moderate severity or higher block that check.
 The complete lockfile also receives a RustSec audit when dependency files
 change; informational maintenance warnings are reported without blocking.
