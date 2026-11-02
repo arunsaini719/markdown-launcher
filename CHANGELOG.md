@@ -26,6 +26,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Conflict-aware atomic replacement that refuses external modifications
 - Local-only preview rendering that never fetches linked remote resources
 - Signed GitHub build-provenance attestations for tagged release archives
+- Audited TLS, certificate-verification, and async-runtime dependency fixes
 
 ### Known limitations
 
