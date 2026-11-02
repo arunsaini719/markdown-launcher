@@ -1,0 +1,86 @@
+name: Accessibility report
+description: Report a keyboard, focus, contrast, or assistive-technology problem
+title: "[Accessibility]: "
+labels: [accessibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping make Markdown Launcher more accessible.
+        Remove private note content, usernames, and personal paths from text,
+        screenshots, and recordings.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Provide the app version or output of `git rev-parse --short HEAD`.
+      placeholder: 0.1.0 or 53e7e64
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating system
+      options:
+        - macOS 15 or later
+        - Linux with X11
+        - Linux with Wayland
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: assistive-technology
+    attributes:
+      label: Assistive technology
+      description: Include the name and version, or say keyboard-only if none was used.
+      placeholder: VoiceOver on macOS 15.4, or keyboard-only
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Keyboard sequence and focused control
+      description: Describe the starting focus and the exact keys or gestures used.
+      placeholder: |
+        1. Focus search...
+        2. Press Tab...
+        3. VoiceOver announces...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected accessible behavior
+      description: Include the expected name, role, state, announcement, contrast, or focus destination.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Explain whether the task is blocked or has a mouse-only workaround.
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Relevant diagnostics
+      description: Run `markdown-snippet-manager --diagnostics` and review the output before attaching it.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for the same accessibility behavior.
+          required: true
+        - label: I removed private note content, usernames, and sensitive paths.
+          required: true

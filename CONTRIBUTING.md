@@ -12,6 +12,7 @@ Read these documents before changing core behavior:
 
 - [Product scope](docs/product-scope.md)
 - [Architecture](docs/architecture.md)
+- [Accessibility support and testing](docs/accessibility.md)
 - [Manual setup and native testing](manual_setup.md)
 
 ## Development setup
