@@ -2763,7 +2763,7 @@ mod tests {
         let viewport = visual
             .debug_bounds("preview-body")
             .expect("preview viewport");
-        visual.simulate_event(gpui_kit::ScrollWheelEvent {
+        visual.simulate_event(gpui_kit::ScrollEvent {
             position: viewport.center(),
             delta: gpui_kit::ScrollDelta::Pixels(point(px(0.0), px(-300.0))),
             ..Default::default()
