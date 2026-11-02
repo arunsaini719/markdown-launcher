@@ -80,6 +80,8 @@ The script:
 4. Configures the bundle as a background accessory application without a Dock
    icon.
 5. Applies and verifies an ad-hoc code signature for local use.
+6. Verifies the version, executable architecture, minimum macOS version, bundle
+   identity, accessory policy, and icon.
 
 The packaged application displays a Markdown Launcher item in the macOS menu
 bar. It does not display a Dock icon. Launch at Login is disabled by default

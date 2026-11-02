@@ -22,7 +22,7 @@ Start from a clean, current `main` branch with a successful CI run.
 5. Confirm the packaged binary and checksum:
 
    ```sh
-   "dist/Markdown Launcher.app/Contents/MacOS/markdown-snippet-manager" --version
+   ./scripts/verify-macos-app.sh "dist/Markdown Launcher.app"
    cd dist
    shasum -a 256 -c markdown-launcher-v*-macos-*.zip.sha256
    ```
@@ -64,8 +64,7 @@ shasum -a 256 -c markdown-launcher-v0.1.0-macos-$(uname -m).zip.sha256
 gh attestation verify markdown-launcher-v0.1.0-macos-$(uname -m).zip \
   --repo arunsaini719/markdown-launcher
 ditto -x -k markdown-launcher-v0.1.0-macos-$(uname -m).zip extracted
-codesign --verify --deep --strict "extracted/Markdown Launcher.app"
-"extracted/Markdown Launcher.app/Contents/MacOS/markdown-snippet-manager" --version
+./scripts/verify-macos-app.sh "extracted/Markdown Launcher.app"
 ```
 
 Confirm that the release contains `arm64` and `x86_64` archives with matching

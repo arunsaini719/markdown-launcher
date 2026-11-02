@@ -90,7 +90,7 @@ cp "$ICON_SOURCE" "$ICONSET_DIR/icon_512x512@2x.png"
 iconutil -c icns "$ICONSET_DIR" -o "$RESOURCES_DIR/AppIcon.icns"
 
 codesign --force --sign - --timestamp=none "$APP_BUNDLE"
-codesign --verify --deep --strict "$APP_BUNDLE"
+EXPECTED_ARCHITECTURE="$(uname -m)" "$ROOT_DIR/scripts/verify-macos-app.sh" "$APP_BUNDLE"
 
 echo
 echo "Created local macOS application:"

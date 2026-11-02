@@ -17,6 +17,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Explicit source editing with autosave and external-change detection
 - Native macOS menu bar controls, settings, Launch at Login, and app packaging
 - Tag-triggered Apple Silicon and Intel macOS prerelease archives with checksums
+- Reusable verification of macOS bundle identity, version, architecture, and policy
 - Non-launching commands to locate application files and validate configuration
 - A macOS menu action that reveals the active configuration file in Finder
 - A privacy-conscious command-line diagnostics report for support requests

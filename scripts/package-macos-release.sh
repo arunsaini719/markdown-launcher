@@ -9,9 +9,8 @@ fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${DIST_DIR:-$ROOT_DIR/dist}"
 APP_BUNDLE="$DIST_DIR/Markdown Launcher.app"
-EXECUTABLE_NAME="markdown-snippet-manager"
 
-for command in cargo python3 ditto shasum codesign; do
+for command in cargo python3 ditto shasum; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "error: required command not found: $command" >&2
     exit 1
@@ -48,13 +47,7 @@ VERIFY_DIR="$(mktemp -d "${TMPDIR:-/tmp}/markdown-launcher-release.XXXXXX")"
 trap 'rm -rf "$VERIFY_DIR"' EXIT
 ditto -x -k "$ARCHIVE_PATH" "$VERIFY_DIR"
 EXTRACTED_APP="$VERIFY_DIR/Markdown Launcher.app"
-codesign --verify --deep --strict "$EXTRACTED_APP"
-ACTUAL_VERSION="$("$EXTRACTED_APP/Contents/MacOS/$EXECUTABLE_NAME" --version)"
-EXPECTED_VERSION="Markdown Launcher $VERSION"
-if [[ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]]; then
-  echo "error: packaged binary reported '$ACTUAL_VERSION', expected '$EXPECTED_VERSION'" >&2
-  exit 1
-fi
+EXPECTED_ARCHITECTURE="$ARCHITECTURE" "$ROOT_DIR/scripts/verify-macos-app.sh" "$EXTRACTED_APP"
 
 echo
 echo "Created release archive and checksum:"
