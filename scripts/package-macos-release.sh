@@ -20,7 +20,7 @@ done
 
 cd "$ROOT_DIR"
 VERSION="$(
-  cargo metadata --no-deps --format-version 1 |
+  cargo metadata --locked --no-deps --format-version 1 |
     python3 -c 'import json, sys; data = json.load(sys.stdin); print(next(package["version"] for package in data["packages"] if package["name"] == "markdown-snippet-manager"))'
 )"
 ARCHITECTURE="$(uname -m)"

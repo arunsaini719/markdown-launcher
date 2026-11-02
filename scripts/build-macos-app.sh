@@ -42,7 +42,7 @@ echo "Building release executable..."
 cargo build --release --locked
 
 VERSION="$(
-  cargo metadata --no-deps --format-version 1 |
+  cargo metadata --locked --no-deps --format-version 1 |
     python3 -c 'import json, sys; data = json.load(sys.stdin); print(next(package["version"] for package in data["packages"] if package["name"] == "markdown-snippet-manager"))'
 )"
 BINARY_PATH="$ROOT_DIR/target/release/$EXECUTABLE_NAME"

@@ -39,7 +39,8 @@ Run the same checks used in CI before opening a pull request:
 ```
 
 The script checks formatting, runs Clippy with warnings denied, and executes all
-targets with every feature enabled. Pull requests that change dependency
+targets with every feature enabled. Dependency-consuming commands use
+`--locked`, so validation fails instead of silently rewriting `Cargo.lock`. Pull requests that change dependency
 manifests or lockfiles also receive an automated dependency review; newly
 introduced vulnerabilities at moderate severity or higher block that check.
 The complete lockfile also receives a RustSec audit when dependency files

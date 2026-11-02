@@ -8,7 +8,7 @@ echo "Checking Rust formatting..."
 cargo fmt --check
 
 echo "Running Clippy with warnings denied..."
-cargo clippy --all-targets --all-features -- -D warnings
+cargo clippy --locked --all-targets --all-features -- -D warnings
 
 echo "Running all tests..."
-cargo test --all-targets --all-features
+cargo test --locked --all-targets --all-features

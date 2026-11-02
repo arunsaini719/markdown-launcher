@@ -5,8 +5,8 @@
 ## Validation
 
 - [ ] `cargo fmt --check`
-- [ ] `cargo clippy --all-targets --all-features -- -D warnings`
-- [ ] `cargo test --all-targets --all-features`
+- [ ] `cargo clippy --locked --all-targets --all-features -- -D warnings`
+- [ ] `cargo test --locked --all-targets --all-features`
 - [ ] Relevant manual keyboard and pointer workflows were exercised
 
 ## Platform coverage
