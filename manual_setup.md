@@ -209,6 +209,17 @@ cargo run -- --check-config
 A valid file prints its path and exits successfully. A missing, malformed, or
 invalid file produces a nonzero exit status and a diagnostic on stderr.
 
+For a support report that does not include application paths, scan roots, or
+note content, run:
+
+```sh
+cargo run -- --diagnostics
+```
+
+The report includes only the application version, operating system,
+architecture, configuration validity, and whether the disposable index exists.
+Review all output before attaching it to a public issue.
+
 SQLite is a derived search index. Deleting it does not delete or modify any
 Markdown source files.
 

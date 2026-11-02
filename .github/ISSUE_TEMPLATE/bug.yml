@@ -59,7 +59,7 @@ body:
     id: diagnostics
     attributes:
       label: Relevant diagnostics
-      description: Paste bounded logs or error text after removing sensitive information.
+      description: Run `markdown-snippet-manager --diagnostics`, then add any bounded error text after reviewing all output for sensitive information.
       render: shell
 
   - type: checkboxes

@@ -1,11 +1,11 @@
-use std::{error::Error, path::Path, process::ExitCode};
+use std::{error::Error, fs, path::Path, process::ExitCode};
 
 use gpui_kit::{
     ActivationPolicy, App, AppContext as _, Bounds, WindowBounds, WindowKind, WindowOptions, px,
     size,
 };
 use markdown_snippet_manager::{
-    config::{AppConfig, AppPaths},
+    config::{AppConfig, AppPaths, ConfigError},
     desktop::{DesktopMenu, SingleInstanceGuard},
     index::IndexWatchService,
     launcher::{Launcher, LauncherServices, RegisteredGlobalShortcut, init_launcher},
@@ -18,6 +18,7 @@ enum StartupCommand {
     Version,
     PrintPaths,
     CheckConfig,
+    Diagnostics,
 }
 
 fn main() -> ExitCode {
@@ -52,6 +53,11 @@ fn run() -> Result<(), Box<dyn Error>> {
             println!("Configuration is valid: {}", paths.config_file.display());
             return Ok(());
         }
+        StartupCommand::Diagnostics => {
+            let paths = AppPaths::discover()?;
+            print!("{}", diagnostics_text(&paths));
+            return Ok(());
+        }
         StartupCommand::Launch => {}
     }
     run_application()
@@ -70,6 +76,7 @@ fn parse_startup_command(args: impl IntoIterator<Item = String>) -> Result<Start
         "-V" | "--version" => Ok(StartupCommand::Version),
         "--print-paths" => Ok(StartupCommand::PrintPaths),
         "--check-config" => Ok(StartupCommand::CheckConfig),
+        "--diagnostics" => Ok(StartupCommand::Diagnostics),
         _ => Err(format!(
             "unknown option '{argument}'; run with --help for usage"
         )),
@@ -87,6 +94,7 @@ fn help_text() -> String {
             "  -V, --version    Print version\n",
             "      --print-paths Show configuration and index paths\n",
             "      --check-config Validate the configuration without launching\n",
+            "      --diagnostics  Print a privacy-conscious support report\n",
         ),
         version = env!("CARGO_PKG_VERSION")
     )
@@ -96,6 +104,46 @@ fn validate_configuration(path: &Path) -> Result<AppConfig, Box<dyn Error>> {
     let mut config = AppConfig::load_for_editing(path)?;
     config.normalize_and_validate()?;
     Ok(config)
+}
+
+fn diagnostics_text(paths: &AppPaths) -> String {
+    let configuration_status = match AppConfig::load_for_editing(&paths.config_file) {
+        Ok(mut config) => match config.normalize_and_validate() {
+            Ok(()) => "valid".to_string(),
+            Err(ConfigError::Invalid(message)) => format!("invalid ({message})"),
+            Err(_) => "invalid".to_string(),
+        },
+        Err(ConfigError::Read { source, .. }) if source.kind() == std::io::ErrorKind::NotFound => {
+            "missing (will be created on launch)".to_string()
+        }
+        Err(ConfigError::Parse { .. }) => "invalid TOML".to_string(),
+        Err(ConfigError::Read { source, .. }) => format!("unreadable ({:?})", source.kind()),
+        Err(_) => "unavailable".to_string(),
+    };
+    let index_status = match fs::metadata(&paths.database_file) {
+        Ok(metadata) if metadata.is_file() => format!("present ({} bytes)", metadata.len()),
+        Ok(_) => "invalid file type".to_string(),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            "missing (will be built on launch)".to_string()
+        }
+        Err(error) => format!("unavailable ({:?})", error.kind()),
+    };
+
+    format!(
+        concat!(
+            "Markdown Launcher diagnostics\n",
+            "Version: {version}\n",
+            "Operating system: {os}\n",
+            "Architecture: {architecture}\n",
+            "Configuration: {configuration_status}\n",
+            "Index: {index_status}\n",
+        ),
+        version = env!("CARGO_PKG_VERSION"),
+        os = std::env::consts::OS,
+        architecture = std::env::consts::ARCH,
+        configuration_status = configuration_status,
+        index_status = index_status,
+    )
 }
 
 fn run_application() -> Result<(), Box<dyn Error>> {
@@ -224,6 +272,10 @@ mod tests {
             parse_startup_command(vec!["--check-config".into()]).unwrap(),
             StartupCommand::CheckConfig
         );
+        assert_eq!(
+            parse_startup_command(vec!["--diagnostics".into()]).unwrap(),
+            StartupCommand::Diagnostics
+        );
     }
 
     #[test]
@@ -247,6 +299,7 @@ mod tests {
         assert!(help.contains(env!("CARGO_PKG_VERSION")));
         assert!(help.contains("--print-paths"));
         assert!(help.contains("--check-config"));
+        assert!(help.contains("--diagnostics"));
     }
 
     #[test]
@@ -275,6 +328,33 @@ mod tests {
             std::fs::read_to_string(&config_file).expect("reread invalid config"),
             "unknown = true\n"
         );
+    }
+
+    #[test]
+    fn diagnostics_report_state_without_exposing_application_paths() {
+        let directory = tempfile::tempdir().expect("temporary directory");
+        let paths = AppPaths {
+            config_file: directory.path().join("private/config.toml"),
+            database_file: directory.path().join("private/index.sqlite3"),
+        };
+
+        let missing = diagnostics_text(&paths);
+        assert!(missing.contains("Configuration: missing"));
+        assert!(missing.contains("Index: missing"));
+        assert!(!missing.contains(&directory.path().display().to_string()));
+
+        let config = AppConfig::default_for_home(directory.path());
+        config
+            .save(&paths.config_file)
+            .expect("save diagnostic config");
+        std::fs::write(&paths.database_file, b"index").expect("write diagnostic index");
+        let present = diagnostics_text(&paths);
+        assert!(present.contains("Configuration: valid"));
+        assert!(present.contains("Index: present (5 bytes)"));
+        assert!(!present.contains(&directory.path().display().to_string()));
+
+        std::fs::write(&paths.config_file, "unknown = true\n").expect("write invalid config");
+        assert!(diagnostics_text(&paths).contains("Configuration: invalid TOML"));
     }
 
     #[test]

@@ -19,6 +19,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Tag-triggered Apple Silicon and Intel macOS prerelease archives with checksums
 - Non-launching commands to locate application files and validate configuration
 - A macOS menu action that reveals the active configuration file in Finder
+- A privacy-conscious command-line diagnostics report for support requests
 
 ### Security
 
