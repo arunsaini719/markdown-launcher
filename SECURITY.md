@@ -28,7 +28,8 @@ also scanned against RustSec whenever dependencies change, every Monday, and on
 demand. GitHub Dependabot alerts and security updates are enabled for newly
 reported advisories. Tagged release archives receive signed GitHub
 build-provenance attestations so downloaded artifacts can be verified against
-this repository. These automated controls supplement rather
+this repository. Third-party workflow actions are pinned to immutable commit
+SHAs while Dependabot continues tracking their documented release lines. These automated controls supplement rather
 than replace responsible disclosure and maintainer review.
 
 Reports involving arbitrary file access, symlink traversal, unsafe replacement

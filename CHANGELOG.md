@@ -28,6 +28,7 @@ and intends to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Signed GitHub build-provenance attestations for tagged release archives
 - Audited TLS, certificate-verification, and async-runtime dependency fixes
 - Pull-request and scheduled RustSec audits for the complete dependency lockfile
+- Immutable commit pins for every third-party GitHub Actions dependency
 
 ### Known limitations
 
