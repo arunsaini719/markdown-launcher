@@ -4,7 +4,7 @@ mod indexer;
 mod scanner;
 mod synchronizer;
 
-pub use database::{DatabaseError, DatabaseRecovery, IndexDatabase, SearchResult};
+pub use database::{DatabaseError, DatabaseRecovery, IndexDatabase, IndexHealth, SearchResult};
 pub use document::{Document, FrontmatterError, ParseError, read_markdown_body};
 pub use indexer::{
     IndexingError, IndexingIssue, IndexingProgress, IndexingReport, MarkdownIndexer,

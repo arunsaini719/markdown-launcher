@@ -24,6 +24,7 @@ VERSION_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --version)"
 HELP_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --help)"
 grep -q -- "--print-paths" <<<"$HELP_OUTPUT"
 grep -q -- "--check-config" <<<"$HELP_OUTPUT"
+grep -q -- "--check-index" <<<"$HELP_OUTPUT"
 grep -q -- "--diagnostics" <<<"$HELP_OUTPUT"
 
 PATHS_OUTPUT="$(HOME="$TEST_HOME" "$BINARY" --print-paths)"
@@ -43,6 +44,11 @@ if HOME="$TEST_HOME" "$BINARY" --check-config >/dev/null 2>&1; then
   echo "error: missing configuration unexpectedly passed validation" >&2
   exit 1
 fi
+if HOME="$TEST_HOME" "$BINARY" --check-index >/dev/null 2>&1; then
+  echo "error: missing index unexpectedly passed validation" >&2
+  exit 1
+fi
+[[ ! -e "$INDEX_PATH" ]]
 
 mkdir -p "$(dirname "$CONFIG_PATH")"
 cat >"$CONFIG_PATH" <<EOF

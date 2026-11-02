@@ -228,12 +228,15 @@ cargo run -- --version
 cargo run -- --help
 cargo run -- --print-paths
 cargo run -- --check-config
+cargo run -- --check-index
 cargo run -- --diagnostics
 ```
 
 `--check-config` reads the existing configuration without creating or rewriting
-it. An invalid file produces a nonzero exit status and a diagnostic on stderr.
-`--diagnostics` reports the version, platform, architecture, and configuration
+it. `--check-index` verifies SQLite integrity, the schema, and the document count
+through a read-only connection; it never migrates, recovers, or creates an
+index. Invalid or missing files produce a nonzero exit status and a diagnostic
+on stderr. `--diagnostics` reports the version, platform, architecture, and configuration
 and index state without printing application paths, scan roots, or note content.
 
 Build a local, ad-hoc-signed macOS application:

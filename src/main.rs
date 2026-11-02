@@ -7,7 +7,7 @@ use gpui_kit::{
 use markdown_snippet_manager::{
     config::{AppConfig, AppPaths, ConfigError},
     desktop::{DesktopMenu, SingleInstanceGuard},
-    index::IndexWatchService,
+    index::{IndexDatabase, IndexWatchService},
     launcher::{Launcher, LauncherServices, RegisteredGlobalShortcut, init_launcher},
 };
 
@@ -18,6 +18,7 @@ enum StartupCommand {
     Version,
     PrintPaths,
     CheckConfig,
+    CheckIndex,
     Diagnostics,
 }
 
@@ -53,6 +54,15 @@ fn run() -> Result<(), Box<dyn Error>> {
             println!("Configuration is valid: {}", paths.config_file.display());
             return Ok(());
         }
+        StartupCommand::CheckIndex => {
+            let paths = AppPaths::discover()?;
+            let health = IndexDatabase::check(&paths.database_file)?;
+            println!(
+                "Index is valid: schema {}, {} documents",
+                health.schema_version, health.document_count
+            );
+            return Ok(());
+        }
         StartupCommand::Diagnostics => {
             let paths = AppPaths::discover()?;
             print!("{}", diagnostics_text(&paths));
@@ -76,6 +86,7 @@ fn parse_startup_command(args: impl IntoIterator<Item = String>) -> Result<Start
         "-V" | "--version" => Ok(StartupCommand::Version),
         "--print-paths" => Ok(StartupCommand::PrintPaths),
         "--check-config" => Ok(StartupCommand::CheckConfig),
+        "--check-index" => Ok(StartupCommand::CheckIndex),
         "--diagnostics" => Ok(StartupCommand::Diagnostics),
         _ => Err(format!(
             "unknown option '{argument}'; run with --help for usage"
@@ -94,6 +105,7 @@ fn help_text() -> String {
             "  -V, --version    Print version\n",
             "      --print-paths Show configuration and index paths\n",
             "      --check-config Validate the configuration without launching\n",
+            "      --check-index  Check index integrity without recovery or migration\n",
             "      --diagnostics  Print a privacy-conscious support report\n",
         ),
         version = env!("CARGO_PKG_VERSION")
@@ -273,6 +285,10 @@ mod tests {
             StartupCommand::CheckConfig
         );
         assert_eq!(
+            parse_startup_command(vec!["--check-index".into()]).unwrap(),
+            StartupCommand::CheckIndex
+        );
+        assert_eq!(
             parse_startup_command(vec!["--diagnostics".into()]).unwrap(),
             StartupCommand::Diagnostics
         );
@@ -299,6 +315,7 @@ mod tests {
         assert!(help.contains(env!("CARGO_PKG_VERSION")));
         assert!(help.contains("--print-paths"));
         assert!(help.contains("--check-config"));
+        assert!(help.contains("--check-index"));
         assert!(help.contains("--diagnostics"));
     }
 

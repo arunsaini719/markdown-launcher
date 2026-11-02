@@ -5,7 +5,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
+use rusqlite::{Connection, OpenFlags, OptionalExtension, TransactionBehavior, params};
 use thiserror::Error;
 
 use super::{document::Document, scanner::DiscoveredFile};
@@ -110,6 +110,12 @@ pub struct DatabaseRecovery {
     pub quarantined_path: PathBuf,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IndexHealth {
+    pub schema_version: i64,
+    pub document_count: usize,
+}
+
 #[derive(Debug)]
 pub struct IndexDatabase {
     connection: Connection,
@@ -153,6 +159,30 @@ impl IndexDatabase {
 
     pub fn open_in_memory() -> Result<Self, DatabaseError> {
         Self::prepare(Connection::open_in_memory()?)
+    }
+
+    pub fn check(path: &Path) -> Result<IndexHealth, DatabaseError> {
+        let connection = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)
+            .map_err(|source| DatabaseError::Open {
+                path: path.to_path_buf(),
+                source,
+            })?;
+        connection.busy_timeout(BUSY_TIMEOUT)?;
+        let database = Self { connection };
+        database.validate_integrity()?;
+        let schema_version = database.schema_version()?;
+        if schema_version > LATEST_SCHEMA_VERSION {
+            return Err(DatabaseError::SchemaTooNew {
+                found: schema_version,
+                supported: LATEST_SCHEMA_VERSION,
+            });
+        }
+        database.validate_schema()?;
+        let document_count = database.document_count()?;
+        Ok(IndexHealth {
+            schema_version,
+            document_count,
+        })
     }
 
     pub fn schema_version(&self) -> Result<i64, DatabaseError> {
@@ -617,6 +647,48 @@ mod tests {
 
         assert!(path.is_file());
         assert_eq!(journal_mode.to_lowercase(), "wal");
+    }
+
+    #[test]
+    fn checks_index_health_without_creating_or_rewriting_files() {
+        let temporary_directory = tempfile::tempdir().expect("temporary directory");
+        let missing_path = temporary_directory.path().join("missing/index.sqlite3");
+        assert!(IndexDatabase::check(&missing_path).is_err());
+        assert!(!missing_path.exists());
+
+        let path = temporary_directory.path().join("index.sqlite3");
+        let mut database = IndexDatabase::open(&path).expect("create database");
+        database
+            .upsert_documents(&[document("/notes/a.md", "Alpha", &[], "body")])
+            .expect("index document");
+        drop(database);
+        let original = fs::read(&path).expect("read index before check");
+
+        assert_eq!(
+            IndexDatabase::check(&path).expect("check index"),
+            IndexHealth {
+                schema_version: LATEST_SCHEMA_VERSION,
+                document_count: 1,
+            }
+        );
+        assert_eq!(fs::read(&path).expect("read index after check"), original);
+    }
+
+    #[test]
+    fn index_health_check_preserves_corrupt_files() {
+        let temporary_directory = tempfile::tempdir().expect("temporary directory");
+        let path = temporary_directory.path().join("index.sqlite3");
+        let contents = b"not a SQLite database";
+        fs::write(&path, contents).expect("write corrupt database");
+
+        assert!(IndexDatabase::check(&path).is_err());
+        assert_eq!(fs::read(&path).expect("read corrupt database"), contents);
+        assert_eq!(
+            fs::read_dir(temporary_directory.path())
+                .expect("read directory")
+                .count(),
+            1
+        );
     }
 
     #[test]
